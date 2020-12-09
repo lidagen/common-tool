@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author wang.song
  * @date 2020-12-09 10:05
- * @Desc
+ * @Desc 布隆过滤器初始化
  */
 @Configuration
 public class BloomConfig {
