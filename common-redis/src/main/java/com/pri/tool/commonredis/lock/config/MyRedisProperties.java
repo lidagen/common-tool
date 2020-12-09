@@ -1,4 +1,4 @@
-package com.example.bloom.config;
+package com.pri.tool.commonredis.lock.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,14 +13,28 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 public class MyRedisProperties {
-
+    /**
+     * 模式
+     */
     private Integer mode;
-
-    private String host;
-
+    /**
+     * 密码
+     */
+    private String password;
+    /**
+     * 单机HOST:PORT
+     */
+    private String hostPort;
+    /**
+     * 单机port
+     */
     private String port;
-
+    /**
+     * 哨兵名称
+     */
     private String sentinelName;
-
+    /**
+     * 哨兵节点
+     */
     private String sentinelnodes;
 }

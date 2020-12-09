@@ -7,7 +7,7 @@ import com.google.common.hash.Hashing;
 /**
  * @author wang.song
  * @date 2020-12-09 10:03
- * @Desc
+ * @Desc bloom Helper
  */
 public class BloomFilterHelper<T> {
     private int numHashFunctions;

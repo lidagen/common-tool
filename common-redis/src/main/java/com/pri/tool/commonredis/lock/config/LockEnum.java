@@ -1,4 +1,4 @@
-package com.pri.tool.commonredis.lock;
+package com.pri.tool.commonredis.lock.config;
 
 /**
  * @author wang.song

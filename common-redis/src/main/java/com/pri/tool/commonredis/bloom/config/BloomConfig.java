@@ -1,7 +1,8 @@
-package com.pri.tool.commonredis.bloom;
+package com.pri.tool.commonredis.bloom.config;
 
 import com.google.common.base.Charsets;
 import com.google.common.hash.Funnel;
+import com.pri.tool.commonredis.bloom.BloomFilterHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
