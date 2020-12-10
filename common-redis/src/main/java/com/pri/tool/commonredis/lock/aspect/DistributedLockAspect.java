@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 public class DistributedLockAspect {
 
     @Around("@annotation(distributedLock)")
-    public void around(ProceedingJoinPoint joinPoint, DistributedLock distributedLock) throws Throwable {
-        execute(joinPoint, distributedLock);
+    public Object around(ProceedingJoinPoint joinPoint, DistributedLock distributedLock) throws Throwable {
+        return execute(joinPoint, distributedLock);
     }
 
     /**
@@ -32,19 +32,21 @@ public class DistributedLockAspect {
      * @param lock
      * @throws Throwable
      */
-    private void execute(ProceedingJoinPoint joinPoint, DistributedLock lock) throws Throwable {
+    private Object execute(ProceedingJoinPoint joinPoint, DistributedLock lock) throws Throwable {
+        Object proceed = null;
         //执行
         try {
             String key = getKeyName(lock);
             boolean acquire = DistributedRedisLock.acquire(key, lock.expireTime(), lock.timeUnit());
             long start = System.currentTimeMillis();
             log.info("DistributedLockAspect.getLock:{}", acquire);
-            joinPoint.proceed();
+            proceed = joinPoint.proceed();
             DistributedRedisLock.release(key);
             log.info("DistributedLockAspect.release.time:{}", System.currentTimeMillis() - start);
         } catch (Throwable throwable) {
             log.error("DistributedLockAspect.error:{}", throwable);
         }
+        return proceed;
     }
 
     /**

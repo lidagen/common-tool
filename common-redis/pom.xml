@@ -19,8 +19,13 @@
             <artifactId>common-base</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.pri.tool</groupId>
+            <artifactId>common-req</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>

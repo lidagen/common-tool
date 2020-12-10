@@ -39,4 +39,8 @@ public class RedisBloomUtil {
 
         return true;
     }
+
+    public RedisTemplate getRedisTemplate() {
+        return redisTemplate;
+    }
 }
