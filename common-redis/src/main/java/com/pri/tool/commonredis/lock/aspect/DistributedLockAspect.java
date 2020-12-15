@@ -37,7 +37,7 @@ public class DistributedLockAspect {
         //执行
         try {
             String key = getKeyName(lock);
-            boolean acquire = DistributedRedisLock.acquire(key, lock.expireTime(), lock.timeUnit());
+            boolean acquire = DistributedRedisLock.acquire(key, lock.waitTime(),lock.expireTime(), lock.timeUnit());
             long start = System.currentTimeMillis();
             log.info("DistributedLockAspect.getLock:{}", acquire);
             proceed = joinPoint.proceed();

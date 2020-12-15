@@ -23,17 +23,18 @@ public class DistributedRedisLock {
     /**
      * 加锁
      * @param lockName 锁名称
-     * @param timeout 加锁时间
+     * @param timeout 加锁过期时间
+     * @param waitTime 等等时间
      * @return
      */
-    public static boolean acquire(String lockName,int timeout,TimeUnit timeUnit){
+    public static boolean acquire(String lockName,int waitTime,int timeout,TimeUnit timeUnit){
         //声明key对象
         String key = LOCK_TITLE + lockName;
         //获取锁对象
         RLock mylock = redisson.getLock(key);
         //加锁，并且设置锁过期时间，防止死锁的产生
         try {
-            return mylock.tryLock(timeout, timeUnit);
+            return mylock.tryLock(waitTime,timeout,timeUnit);
         } catch (InterruptedException e) {
             log.error("======lock,e:{}======" + Thread.currentThread().getName(),e);
             return Boolean.FALSE;
