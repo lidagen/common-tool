@@ -6,11 +6,15 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author wang.song
@@ -19,71 +23,44 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(MyRedisProperties.class)
+@EnableConfigurationProperties(RedisProperties.class)
 public class RedissonConfiguration {
     /**
      * 构建前缀
      */
-    private static final String SENTINEL_PREFIX = "redis://";
-
-    private static Config config = new Config();
-
-    private static  Redisson redisson;
+    private static final String REDIS_PREFIX = "redis://";
 
 
-    @Bean
-    @ConditionalOnMissingBean(RedissonClient.class)
-    MyRedisProperties getProperties(MyRedisProperties myRedisProperties) {
-        createRedisson(myRedisProperties);
-        return myRedisProperties;
-    }
-
-
-    private void createRedisson(MyRedisProperties myRedisProperties) {
-        Integer mode = myRedisProperties.getMode();
-        setConfig(mode, myRedisProperties);
-        redisson=(Redisson) Redisson.create(config);
-    }
-
-    public static Redisson getRedisson(){
-        return redisson;
-    }
-
+    private static Redisson redisson;
 
     /**
-     * 根据配置文件获取redis模式
-     *
-     * @param type
-     * @param myRedisProperties
+     * 单机模式 redisson 客户端
      */
-    private void setConfig(Integer type, MyRedisProperties myRedisProperties) {
-        switch (type) {
-            case 1:
-                //单机redis
-                config.useSingleServer().setAddress(SENTINEL_PREFIX + myRedisProperties.getHostPort()).setPassword(myRedisProperties.getPassword());
-                break;
-            case 2:
-                //哨兵
-                String[] split = myRedisProperties.getSentinelnodes().split(",");
-                List<String> arrayList = Lists.newArrayList();
-                for (String sp : split) {
-                    arrayList.add(SENTINEL_PREFIX + sp);
-                }
-                String[] strings = arrayList.toArray(new String[arrayList.size()]);
-                config.useSentinelServers().addSentinelAddress(strings)
-                        .setMasterName(myRedisProperties.getSentinelName()).setPassword(myRedisProperties.getPassword()).setDatabase(0);
-                break;
-            case 3:
-                //TODO 集群
-                config.useClusterServers().addNodeAddress(
-                        "redis://172.29.3.245:6375", "redis://172.29.3.245:6376", "redis://172.29.3.245:6377",
-                        "redis://172.29.3.245:6378", "redis://172.29.3.245:6379", "redis://172.29.3.245:6380")
-                        .setPassword("a123456").setScanInterval(5000);
-                break;
-            default:
-                //默认单机
-                config.useSingleServer().setAddress("redis://172.0.0.1:6379");
-        }
+    @Bean
+    @ConditionalOnMissingBean(RedissonClient.class)
+    RedissonClient redissonClient(RedisProperties redisProperties) {
+        return createRedissonClient(redisProperties);
     }
 
+    private RedissonClient createRedissonClient(RedisProperties properties) {
+        Config config = new Config();
+        if (properties.getSentinel() != null && properties.getSentinel().getNodes() != null &&
+                Objects.nonNull(properties.getSentinel().getMaster())) {
+            List<String> nodesList = properties.getSentinel().getNodes();
+            List<String> collect = nodesList.stream().map(vo -> REDIS_PREFIX+vo).collect(Collectors.toList());
+
+            config.useSentinelServers().setMasterName(properties.getSentinel().getMaster())
+                    .addSentinelAddress(collect.toArray(new String[0])).setPassword(properties.getPassword());
+        } else if (properties.getCluster() != null && properties.getCluster().getNodes() != null) {
+            config.useClusterServers().addNodeAddress(properties.getCluster().getNodes().toArray(new String[0])).setPassword(properties.getPassword());
+        } else {
+            config.useSingleServer().setAddress(REDIS_PREFIX + properties.getHost() + ":" + properties.getPort()).setPassword(properties.getPassword());
+        }
+        redisson = (Redisson) Redisson.create(config);
+        return Redisson.create(config);
+    }
+
+    public static Redisson getRedisson() {
+        return redisson;
+    }
 }
