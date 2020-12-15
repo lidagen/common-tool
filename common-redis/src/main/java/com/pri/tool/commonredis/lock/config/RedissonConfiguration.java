@@ -52,7 +52,9 @@ public class RedissonConfiguration {
             config.useSentinelServers().setMasterName(properties.getSentinel().getMaster())
                     .addSentinelAddress(collect.toArray(new String[0])).setPassword(properties.getPassword());
         } else if (properties.getCluster() != null && properties.getCluster().getNodes() != null) {
-            config.useClusterServers().addNodeAddress(properties.getCluster().getNodes().toArray(new String[0])).setPassword(properties.getPassword());
+            List<String> nodesList = properties.getCluster().getNodes();
+            List<String> collect = nodesList.stream().map(vo -> REDIS_PREFIX+vo).collect(Collectors.toList());
+            config.useClusterServers().addNodeAddress(collect.toArray(new String[0])).setPassword(properties.getPassword());
         } else {
             config.useSingleServer().setAddress(REDIS_PREFIX + properties.getHost() + ":" + properties.getPort()).setPassword(properties.getPassword());
         }
